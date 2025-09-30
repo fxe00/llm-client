@@ -134,15 +134,19 @@ jobs:
       - name: Filter release files
         run: |
           echo "=== Filtering release files ==="
-          find ./artifacts -name "*.dmg" -o -name "*.AppImage" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" | head -10
+          find ./artifacts -name "*.dmg" -o -name "*.AppImage" -o -name "*.exe" -o -name "*.msi" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" -o -name "*.tar.gz" | head -10
           echo "=== Creating filtered directories ==="
           mkdir -p ./release-files
+          # 安装包
           find ./artifacts -name "*.dmg" -exec cp {} ./release-files/ \;
-          find ./artifacts -name "*.AppImage" -exec cp {} ./release-files/ \;
-          find ./artifacts -name "*.exe" -exec cp {} ./release-files/ \;
           find ./artifacts -name "*.msi" -exec cp {} ./release-files/ \;
           find ./artifacts -name "*.deb" -exec cp {} ./release-files/ \;
           find ./artifacts -name "*.rpm" -exec cp {} ./release-files/ \;
+          # 便携式文件
+          find ./artifacts -name "*.zip" -exec cp {} ./release-files/ \;
+          find ./artifacts -name "*.tar.gz" -exec cp {} ./release-files/ \;
+          find ./artifacts -name "*.AppImage" -exec cp {} ./release-files/ \;
+          find ./artifacts -name "*.exe" -exec cp {} ./release-files/ \;
           echo "=== Release files ready ==="
           ls -la ./release-files/
 
