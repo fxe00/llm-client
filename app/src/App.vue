@@ -59,6 +59,9 @@
                   <button @click="showPromptSelector = true" class="prompt-btn">
                     📝 选择提示词
                   </button>
+                  <button @click="clearCurrentChat" class="clear-btn" :disabled="messages.length === 0">
+                    🗑️ 清理对话
+                  </button>
                   <button @click="testConnection" class="test-btn">
                     🔧 测试连接
                   </button>
@@ -2314,6 +2317,19 @@ const diagnoseNetwork = async () => {
   
   console.log('🔍 完整诊断结果:', diagnostics)
   alert(`网络诊断完成！\n\n环境: ${diagnostics.environment}\n在线状态: ${diagnostics.online ? '在线' : '离线'}\n基本连接: ${diagnostics.basicConnectivity}\n\n详细信息请查看控制台`)
+}
+
+// 清理当前对话
+const clearCurrentChat = () => {
+  if (messages.value.length === 0) {
+    return // 如果没有消息，不需要清理
+  }
+  
+  if (confirm('确定要清理当前对话吗？此操作将清空所有消息，且无法恢复。')) {
+    messages.value = []
+    currentMessage.value = ''
+    console.log('🗑️ 当前对话已清理')
+  }
 }
 
 // AI模型API调用函数
@@ -5603,6 +5619,28 @@ const callAIModel = async (message) => {
   background: #138496;
 }
 
+.clear-btn {
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.clear-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -6120,5 +6158,19 @@ const callAIModel = async (message) => {
 .app-container.dark-mode .message-input:focus {
   border-color: var(--primary-color, #ffc107);
   box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+.app-container.dark-mode .clear-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.app-container.dark-mode .clear-btn:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.app-container.dark-mode .clear-btn:disabled {
+  background: #6c757d;
+  opacity: 0.6;
 }
        </style>
