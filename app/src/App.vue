@@ -2782,9 +2782,9 @@ const callAIModel = async (message) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #f0f0f0;
-  min-height: 50px;
+  min-height: 36px;
 }
 
 .setting-item:last-child {
@@ -3197,8 +3197,8 @@ const callAIModel = async (message) => {
 .models-section {
   background: var(--bg-gradient, linear-gradient(135deg, #fffef7 0%, #f9f6e8 100%));
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
   box-shadow: 0 2px 8px rgba(139, 105, 20, 0.1);
   border: 1px solid var(--border-color, #e6d7a3);
 }
@@ -3329,8 +3329,8 @@ const callAIModel = async (message) => {
 .model-card {
   background: white;
   border: 1px solid var(--border-color, #e6d7a3);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 14px;
   transition: all 0.3s ease;
   position: relative;
 }
@@ -3761,19 +3761,19 @@ const callAIModel = async (message) => {
 
 .sessions-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .stat-card {
   background: var(--bg-gradient, linear-gradient(135deg, #fffef7 0%, #f9f6e8 100%));
   border: 1px solid var(--border-color, #e6d7a3);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 12px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   transition: all 0.3s ease;
 }
 
@@ -4988,17 +4988,17 @@ const callAIModel = async (message) => {
 
 .prompts-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 .prompts-filters {
   background: var(--bg-gradient, linear-gradient(135deg, #fffef7 0%, #f9f6e8 100%));
   border: 1px solid var(--border-color, #e6d7a3);
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
 }
 
 .prompts-actions {
@@ -5558,27 +5558,52 @@ const callAIModel = async (message) => {
 
 .chat-controls {
   display: flex;
-  gap: 12px;
+  gap: 6px;
   align-items: center;
 }
 
 .model-select {
-  padding: 8px 12px;
-  border: 1px solid var(--border-color, #e6d7a3);
-  border-radius: 6px;
-  background: white;
+  padding: 6px 12px;
+  border: 2px solid var(--border-color, #e6d7a3);
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   color: var(--text-color, #8b6914);
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  min-width: 120px;
+  position: relative;
+  outline: none;
+}
+
+.model-select:hover {
+  border-color: var(--primary-color, #ffc107);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.12);
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #ffffff 0%, #fefcf7 100%);
+}
+
+.model-select:focus {
+  border-color: var(--primary-color, #ffc107);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2), 0 4px 12px rgba(255, 193, 7, 0.12);
+  transform: translateY(-1px);
+}
+
+.model-select:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .prompt-btn {
-  padding: 8px 16px;
+  padding: 5px 10px;
   background: var(--primary-color, #ffc107);
   color: var(--text-color, #8b6914);
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -5588,13 +5613,13 @@ const callAIModel = async (message) => {
 }
 
 .test-btn {
-  padding: 8px 16px;
+  padding: 5px 10px;
   background: #6c757d;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -5604,13 +5629,13 @@ const callAIModel = async (message) => {
 }
 
 .diagnose-btn {
-  padding: 8px 16px;
+  padding: 5px 10px;
   background: #17a2b8;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -5620,13 +5645,13 @@ const callAIModel = async (message) => {
 }
 
 .clear-btn {
-  padding: 8px 16px;
+  padding: 5px 10px;
   background: #dc3545;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -5695,28 +5720,38 @@ const callAIModel = async (message) => {
 }
 
 .message-content {
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 16px 20px;
+  border-radius: 18px;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .message.user .message-content {
-  background: var(--primary-color, #ffc107);
+  background: linear-gradient(135deg, var(--primary-color, #ffc107) 0%, var(--primary-dark, #ffb300) 100%);
   color: var(--text-color, #8b6914);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  font-weight: 500;
 }
 
 .message.assistant .message-content {
-  background: white;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   color: #333;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .message-time {
-  font-size: 12px;
+  font-size: 11px;
   color: #999;
-  margin-top: 4px;
+  margin-top: 6px;
   text-align: right;
+  opacity: 0.7;
+  font-weight: 400;
 }
 
 .message.assistant .message-time {
@@ -5727,6 +5762,14 @@ const callAIModel = async (message) => {
 .message.loading .message-content {
   color: #666;
   font-style: italic;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px dashed #dee2e6;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .loading-indicator {
@@ -5764,15 +5807,18 @@ const callAIModel = async (message) => {
 
 /* 错误状态样式 */
 .message.error .message-content {
-  background: #ffebee;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
   color: #c62828;
   border: 1px solid #ffcdd2;
+  box-shadow: 0 4px 12px rgba(198, 40, 40, 0.15);
+  font-weight: 500;
 }
 
 .app-container.dark-mode .message.error .message-content {
-  background: #3d1a1a;
+  background: linear-gradient(135deg, #3d1a1a 0%, #2d0f0f 100%);
   color: #ffcdd2;
   border-color: #5d1a1a;
+  box-shadow: 0 4px 12px rgba(255, 205, 210, 0.2);
 }
 
 .chat-input {
@@ -5792,24 +5838,28 @@ const callAIModel = async (message) => {
 
 .message-input {
   flex: 1;
-  padding: 14px 18px;
-  border: 1px solid var(--border-color, #e6d7a3);
-  border-radius: 20px;
+  padding: 16px 20px;
+  border: 2px solid var(--border-color, #e6d7a3);
+  border-radius: 24px;
   resize: none;
-  font-size: 14px;
+  font-size: 15px;
   font-family: inherit;
-  min-height: 40px;
-  max-height: 120px;
-  line-height: 1.4;
-  transition: all 0.3s ease;
+  min-height: 56px;
+  max-height: 140px;
+  line-height: 1.5;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-sizing: border-box;
   width: 100%;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .message-input:focus {
   outline: none;
   border-color: var(--primary-color, #ffc107);
-  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+  box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.2), 0 4px 16px rgba(255, 193, 7, 0.15);
+  background: linear-gradient(135deg, #ffffff 0%, #fefcf7 100%);
+  transform: translateY(-1px);
 }
 
 .send-btn {
@@ -6068,9 +6118,21 @@ const callAIModel = async (message) => {
 }
 
 .app-container.dark-mode .model-select {
-  background: #3d3d3d;
+  background: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
   border-color: #555;
   color: #ecf0f1;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+}
+
+.app-container.dark-mode .model-select:hover {
+  border-color: var(--primary-color, #ffc107);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+  background: linear-gradient(135deg, #3d3d3d 0%, #2a2a2a 100%);
+}
+
+.app-container.dark-mode .model-select:focus {
+  border-color: var(--primary-color, #ffc107);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.2), 0 4px 12px rgba(255, 193, 7, 0.15);
 }
 
 .app-container.dark-mode .chat-messages {
@@ -6086,9 +6148,10 @@ const callAIModel = async (message) => {
 }
 
 .app-container.dark-mode .message.assistant .message-content {
-  background: #333;
+  background: linear-gradient(135deg, #333 0%, #2d2d2d 100%);
   color: #ecf0f1;
   border-color: #555;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .app-container.dark-mode .chat-input {
@@ -6097,9 +6160,10 @@ const callAIModel = async (message) => {
 }
 
 .app-container.dark-mode .message-input {
-  background: #3d3d3d;
+  background: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
   border-color: #555;
   color: #ecf0f1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .app-container.dark-mode .prompt-selector,
@@ -6150,9 +6214,10 @@ const callAIModel = async (message) => {
 }
 
 .app-container.dark-mode .message-input {
-  background: #3d3d3d;
+  background: linear-gradient(135deg, #3d3d3d 0%, #2d2d2d 100%);
   border-color: #555;
   color: #ecf0f1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .app-container.dark-mode .message-input:focus {
