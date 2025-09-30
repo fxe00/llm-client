@@ -1,168 +1,529 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-export interface Prompt {
+export interface PromptTemplate {
   id: string
-  name: string
-  description: string
+  title: string
   content: string
   category: string
   tags: string[]
-  variables: PromptVariable[]
-  createdAt: Date
-  updatedAt: Date
+  description?: string
+  variables: string[] // 模板变量，如 {{name}}, {{topic}} 等
+  isPublic: boolean
+  isFavorite: boolean
+  usageCount: number
+  createdAt: number
+  updatedAt: number
+  author?: string
+  language: 'zh-CN' | 'en-US'
+  estimatedTokens: number
 }
 
-export interface PromptVariable {
+export interface PromptCategory {
+  id: string
   name: string
-  label: string
-  type: 'text' | 'number' | 'select'
-  required: boolean
-  defaultValue?: string
-  options?: string[]
+  description: string
+  icon: string
+  color: string
+  isDefault: boolean
+}
+
+export interface PromptFilter {
+  search: string
+  category: string
+  tags: string[]
+  language: string
+  isPublic: boolean | null
+  isFavorite: boolean | null
+  author: string
 }
 
 export const usePromptsStore = defineStore('prompts', () => {
-  // 提示词列表
-  const prompts = ref<Prompt[]>([])
-  
-  // 当前选中的提示词
-  const selectedPrompt = ref<Prompt | null>(null)
-  
-  // 搜索关键词
-  const searchKeyword = ref('')
-  
-  // 选中的分类
-  const selectedCategory = ref('all')
-  
+  // 响应式状态
+  const prompts = ref<PromptTemplate[]>([])
+  const categories = ref<PromptCategory[]>([])
+  const isLoading = ref(false)
+  const filter = ref<PromptFilter>({
+    search: '',
+    category: '',
+    tags: [],
+    language: '',
+    isPublic: null,
+    isFavorite: null,
+    author: ''
+  })
+
+  // 默认分类
+  const defaultCategories: PromptCategory[] = [
+    {
+      id: 'general',
+      name: '通用',
+      description: '通用提示词模板',
+      icon: '💬',
+      color: '#4a90e2',
+      isDefault: true
+    },
+    {
+      id: 'writing',
+      name: '写作',
+      description: '写作相关的提示词',
+      icon: '✍️',
+      color: '#f39c12',
+      isDefault: true
+    },
+    {
+      id: 'coding',
+      name: '编程',
+      description: '编程和代码相关的提示词',
+      icon: '💻',
+      color: '#27ae60',
+      isDefault: true
+    },
+    {
+      id: 'analysis',
+      name: '分析',
+      description: '数据分析和思维导图',
+      icon: '📊',
+      color: '#e74c3c',
+      isDefault: true
+    },
+    {
+      id: 'creative',
+      name: '创意',
+      description: '创意和艺术相关',
+      icon: '🎨',
+      color: '#9b59b6',
+      isDefault: true
+    },
+    {
+      id: 'education',
+      name: '教育',
+      description: '学习和教育相关',
+      icon: '📚',
+      color: '#3498db',
+      isDefault: true
+    }
+  ]
+
   // 计算属性
   const filteredPrompts = computed(() => {
-    let result = prompts.value
-    
-    // 按分类过滤
-    if (selectedCategory.value !== 'all') {
-      result = result.filter(p => p.category === selectedCategory.value)
-    }
-    
-    // 按关键词搜索
-    if (searchKeyword.value) {
-      const keyword = searchKeyword.value.toLowerCase()
-      result = result.filter(p => 
-        p.name.toLowerCase().includes(keyword) ||
-        p.description.toLowerCase().includes(keyword) ||
-        p.content.toLowerCase().includes(keyword) ||
-        p.tags.some(tag => tag.toLowerCase().includes(keyword))
+    let filtered = prompts.value
+
+    // 搜索过滤
+    if (filter.value.search) {
+      const searchLower = filter.value.search.toLowerCase()
+      filtered = filtered.filter(prompt => 
+        prompt.title.toLowerCase().includes(searchLower) ||
+        prompt.content.toLowerCase().includes(searchLower) ||
+        prompt.description?.toLowerCase().includes(searchLower) ||
+        prompt.tags.some(tag => tag.toLowerCase().includes(searchLower))
       )
     }
-    
-    return result
-  })
-  
-  const categories = computed(() => {
-    const cats = new Set(prompts.value.map(p => p.category))
-    return Array.from(cats)
-  })
-  
-  // 方法
-  const createPrompt = (prompt: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newPrompt: Prompt = {
-      ...prompt,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date()
+
+    // 分类过滤
+    if (filter.value.category) {
+      filtered = filtered.filter(prompt => prompt.category === filter.value.category)
     }
+
+    // 标签过滤
+    if (filter.value.tags.length > 0) {
+      filtered = filtered.filter(prompt =>
+        filter.value.tags.some(tag => prompt.tags.includes(tag))
+      )
+    }
+
+    // 语言过滤
+    if (filter.value.language) {
+      filtered = filtered.filter(prompt => prompt.language === filter.value.language)
+    }
+
+
+    // 公开性过滤
+    if (filter.value.isPublic !== null) {
+      filtered = filtered.filter(prompt => prompt.isPublic === filter.value.isPublic)
+    }
+
+    // 收藏过滤
+    if (filter.value.isFavorite !== null) {
+      filtered = filtered.filter(prompt => prompt.isFavorite === filter.value.isFavorite)
+    }
+
+    // 作者过滤
+    if (filter.value.author) {
+      filtered = filtered.filter(prompt => prompt.author === filter.value.author)
+    }
+
+    // 按使用次数和更新时间排序
+    return filtered.sort((a, b) => {
+      if (a.isFavorite !== b.isFavorite) {
+        return a.isFavorite ? -1 : 1
+      }
+      if (a.usageCount !== b.usageCount) {
+        return b.usageCount - a.usageCount
+      }
+      return b.updatedAt - a.updatedAt
+    })
+  })
+
+  const favoritePrompts = computed(() => 
+    prompts.value.filter(prompt => prompt.isFavorite)
+  )
+
+  const publicPrompts = computed(() => 
+    prompts.value.filter(prompt => prompt.isPublic)
+  )
+
+  const allTags = computed(() => {
+    const tagSet = new Set<string>()
+    prompts.value.forEach(prompt => {
+      prompt.tags.forEach(tag => tagSet.add(tag))
+    })
+    return Array.from(tagSet).sort()
+  })
+
+  const allAuthors = computed(() => {
+    const authorSet = new Set<string>()
+    prompts.value.forEach(prompt => {
+      if (prompt.author) {
+        authorSet.add(prompt.author)
+      }
+    })
+    return Array.from(authorSet).sort()
+  })
+
+  const categoryStats = computed(() => {
+    const stats: { [key: string]: number } = {}
+    categories.value.forEach(category => {
+      stats[category.id] = prompts.value.filter(p => p.category === category.id).length
+    })
+    return stats
+  })
+
+  const totalUsage = computed(() => 
+    prompts.value.reduce((total, prompt) => total + prompt.usageCount, 0)
+  )
+
+  // 方法
+  const loadPrompts = async () => {
+    try {
+      isLoading.value = true
+      
+      // 优先从文件系统加载
+      if (window.electronAPI && window.electronAPI.loadPrompts) {
+        try {
+          const filePrompts = await window.electronAPI.loadPrompts()
+          if (filePrompts && filePrompts.length > 0) {
+            prompts.value = filePrompts
+            console.log('✅ 提示词数据已从文件系统加载:', filePrompts.length, '个提示词')
+            // 同步到localStorage作为备份
+            localStorage.setItem('llm-client-prompts', JSON.stringify(filePrompts))
+            return
+          }
+        } catch (fileError) {
+          console.warn('⚠️ 从文件系统加载失败，尝试从localStorage加载:', fileError)
+        }
+      }
+      
+      // 从localStorage加载
+      const saved = localStorage.getItem('llm-client-prompts')
+      if (saved) {
+        const parsedPrompts = JSON.parse(saved)
+        prompts.value = parsedPrompts
+        console.log('✅ 提示词数据已从本地存储加载:', parsedPrompts.length, '个提示词')
+      } else {
+        prompts.value = []
+        console.log('📝 使用空的提示词列表')
+      }
+    } catch (error) {
+      console.error('❌ 加载提示词数据失败:', error)
+      prompts.value = []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const loadCategories = () => {
+    try {
+      const saved = localStorage.getItem('llm-client-prompt-categories')
+      if (saved) {
+        const parsedCategories = JSON.parse(saved)
+        categories.value = parsedCategories
+      } else {
+        categories.value = [...defaultCategories]
+        saveCategories()
+      }
+    } catch (error) {
+      console.error('❌ 加载分类数据失败:', error)
+      categories.value = [...defaultCategories]
+    }
+  }
+
+  const savePrompts = async () => {
+    try {
+      // 保存到localStorage
+      localStorage.setItem('llm-client-prompts', JSON.stringify(prompts.value))
+      console.log('💾 提示词数据已保存到本地存储:', prompts.value.length, '个提示词')
+      
+      // 同时保存到文件系统（如果可用）
+      if (window.electronAPI && window.electronAPI.savePrompts) {
+        try {
+          await window.electronAPI.savePrompts(prompts.value)
+          console.log('💾 提示词数据已同步到文件系统')
+        } catch (fileError) {
+          console.warn('⚠️ 保存到文件系统失败，但localStorage已保存:', fileError)
+        }
+      }
+    } catch (error) {
+      console.error('❌ 保存提示词数据失败:', error)
+    }
+  }
+
+  const saveCategories = () => {
+    try {
+      localStorage.setItem('llm-client-prompt-categories', JSON.stringify(categories.value))
+    } catch (error) {
+      console.error('❌ 保存分类数据失败:', error)
+    }
+  }
+
+  const createPrompt = (prompt: Omit<PromptTemplate, 'id' | 'createdAt' | 'updatedAt' | 'usageCount'>) => {
+    const newPrompt: PromptTemplate = {
+      ...prompt,
+      id: `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      usageCount: 0
+    }
+    
     prompts.value.unshift(newPrompt)
+    savePrompts()
     return newPrompt
   }
-  
-  const updatePrompt = (id: string, updates: Partial<Prompt>) => {
-    const index = prompts.value.findIndex(p => p.id === id)
-    if (index > -1) {
-      prompts.value[index] = {
-        ...prompts.value[index],
-        ...updates,
-        updatedAt: new Date()
+
+  const updatePrompt = (id: string, updates: Partial<PromptTemplate>) => {
+    const index = prompts.value.findIndex(prompt => prompt.id === id)
+    if (index !== -1) {
+      prompts.value[index] = { 
+        ...prompts.value[index], 
+        ...updates, 
+        updatedAt: Date.now() 
       }
+      savePrompts()
     }
   }
-  
+
   const deletePrompt = (id: string) => {
-    const index = prompts.value.findIndex(p => p.id === id)
-    if (index > -1) {
+    const index = prompts.value.findIndex(prompt => prompt.id === id)
+    if (index !== -1) {
       prompts.value.splice(index, 1)
+      savePrompts()
     }
   }
-  
-  const selectPrompt = (prompt: Prompt | null) => {
-    selectedPrompt.value = prompt
+
+  const duplicatePrompt = (id: string) => {
+    const originalPrompt = prompts.value.find(p => p.id === id)
+    if (originalPrompt) {
+      const duplicatedPrompt: PromptTemplate = {
+        ...originalPrompt,
+        id: `prompt-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: `${originalPrompt.title} (副本)`,
+        isFavorite: false,
+        usageCount: 0,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      }
+      prompts.value.unshift(duplicatedPrompt)
+      savePrompts()
+      return duplicatedPrompt
+    }
   }
-  
-  const setSearchKeyword = (keyword: string) => {
-    searchKeyword.value = keyword
+
+  const toggleFavorite = (id: string) => {
+    const prompt = prompts.value.find(p => p.id === id)
+    if (prompt) {
+      prompt.isFavorite = !prompt.isFavorite
+      prompt.updatedAt = Date.now()
+      savePrompts()
+    }
   }
-  
-  const setSelectedCategory = (category: string) => {
-    selectedCategory.value = category
+
+  const incrementUsage = (id: string) => {
+    const prompt = prompts.value.find(p => p.id === id)
+    if (prompt) {
+      prompt.usageCount++
+      prompt.updatedAt = Date.now()
+      savePrompts()
+    }
   }
-  
-  // 初始化示例数据
-  const initSampleData = () => {
-    if (prompts.value.length === 0) {
-      const samplePrompts: Omit<Prompt, 'id' | 'createdAt' | 'updatedAt'>[] = [
-        {
-          name: '代码审查助手',
-          description: '用于代码审查的专业提示词模板',
-          content: '你是一个专业的代码审查专家。请仔细审查以下代码，并提供：\n\n1. 代码质量评估\n2. 潜在问题识别\n3. 改进建议\n4. 最佳实践建议\n\n请按照以下格式回复：\n- 总体评价: [评价]\n- 问题列表: [问题1, 问题2, ...]\n- 改进建议: [建议1, 建议2, ...]\n\n代码:\n```{language}\n{code}\n```',
-          category: '编程',
-          tags: ['代码', '审查', '质量'],
-          variables: [
-            { name: 'language', label: '编程语言', type: 'text', required: true },
-            { name: 'code', label: '代码内容', type: 'text', required: true }
-          ]
-        },
-        {
-          name: '产品需求分析',
-          description: '分析产品需求并提供建议的模板',
-          content: '作为一个产品经理，请分析以下产品需求：\n\n**需求描述：**\n{requirement}\n\n**目标用户：**\n{targetUsers}\n\n请从以下角度进行分析：\n1. 需求合理性\n2. 用户体验\n3. 技术可行性\n4. 商业价值\n5. 风险评估\n\n请提供详细的分析报告和改进建议。',
-          category: '产品',
-          tags: ['产品', '需求', '分析'],
-          variables: [
-            { name: 'requirement', label: '需求描述', type: 'text', required: true },
-            { name: 'targetUsers', label: '目标用户', type: 'text', required: true }
-          ]
-        },
-        {
-          name: '创意写作助手',
-          description: '帮助创意写作的灵感提示词',
-          content: '你是一个创意写作专家。请根据以下要求创作内容：\n\n**主题：** {topic}\n**风格：** {style}\n**长度：** {length}\n**目标读者：** {audience}\n\n请创作一篇{style}风格的{topic}文章，目标读者是{audience}，长度约{length}字。\n\n要求：\n1. 开头要有吸引力\n2. 结构清晰，逻辑性强\n3. 语言生动，富有感染力\n4. 结尾要有总结或升华',
-          category: '写作',
-          tags: ['写作', '创意', '内容'],
-          variables: [
-            { name: 'topic', label: '主题', type: 'text', required: true },
-            { name: 'style', label: '风格', type: 'select', required: true, options: ['正式', '轻松', '幽默', '严肃', '抒情'] },
-            { name: 'length', label: '长度', type: 'select', required: true, options: ['500字', '1000字', '1500字', '2000字'] },
-            { name: 'audience', label: '目标读者', type: 'text', required: true }
-          ]
+
+  const addCategory = (category: Omit<PromptCategory, 'id'>) => {
+    const newCategory: PromptCategory = {
+      ...category,
+      id: `category-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    }
+    categories.value.push(newCategory)
+    saveCategories()
+    return newCategory
+  }
+
+  const updateCategory = (id: string, updates: Partial<PromptCategory>) => {
+    const index = categories.value.findIndex(category => category.id === id)
+    if (index !== -1) {
+      categories.value[index] = { ...categories.value[index], ...updates }
+      saveCategories()
+    }
+  }
+
+  const deleteCategory = (id: string) => {
+    // 不能删除默认分类
+    const category = categories.value.find(c => c.id === id)
+    if (category && category.isDefault) {
+      throw new Error('不能删除默认分类')
+    }
+    
+    const index = categories.value.findIndex(category => category.id === id)
+    if (index !== -1) {
+      categories.value.splice(index, 1)
+      saveCategories()
+    }
+  }
+
+  const getCategoryById = (id: string) => {
+    return categories.value.find(category => category.id === id)
+  }
+
+  const clearFilter = () => {
+    filter.value = {
+      search: '',
+      category: '',
+      tags: [],
+      language: '',
+      isPublic: null,
+      isFavorite: null,
+      author: ''
+    }
+  }
+
+  const exportPrompts = async (promptIds?: string[]) => {
+    const promptsToExport = promptIds 
+      ? prompts.value.filter(p => promptIds.includes(p.id))
+      : prompts.value
+
+    if (window.electronAPI && window.electronAPI.exportPrompts) {
+      try {
+        await window.electronAPI.exportPrompts(promptsToExport)
+        console.log('📤 提示词数据已导出')
+        alert('提示词数据已导出')
+      } catch (error) {
+        console.error('❌ 导出提示词数据失败:', error)
+        alert('导出失败: ' + error)
+      }
+    } else {
+      // 浏览器环境，使用下载
+      const dataStr = JSON.stringify(promptsToExport, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `llm-client-prompts-${new Date().toISOString().split('T')[0]}.json`
+      link.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  const importPrompts = async () => {
+    if (window.electronAPI && window.electronAPI.importPrompts) {
+      try {
+        const importedPrompts = await window.electronAPI.importPrompts()
+        if (importedPrompts && importedPrompts.length > 0) {
+          prompts.value = [...prompts.value, ...importedPrompts]
+          await savePrompts()
+          console.log('📥 提示词数据已导入:', importedPrompts.length, '个提示词')
+          alert('提示词数据已导入: ' + importedPrompts.length + '个提示词')
         }
-      ]
-      
-      samplePrompts.forEach(prompt => createPrompt(prompt))
+      } catch (error) {
+        console.error('❌ 导入提示词数据失败:', error)
+        alert('导入失败: ' + error)
+      }
+    } else {
+      // 浏览器环境，使用文件选择
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = '.json'
+      input.onchange = async (e) => {
+        const target = e.target as HTMLInputElement
+        if (target && target.files && target.files.length > 0) {
+          const file = target.files[0]
+          try {
+            const text = await file.text()
+            const importedPrompts = JSON.parse(text)
+            prompts.value = [...prompts.value, ...importedPrompts]
+            await savePrompts()
+            console.log('📥 提示词数据已导入:', importedPrompts.length, '个提示词')
+            alert('提示词数据已导入: ' + importedPrompts.length + '个提示词')
+          } catch (error) {
+            console.error('❌ 导入提示词数据失败:', error)
+            alert('导入失败: ' + error)
+          }
+        }
+      }
+      input.click()
     }
   }
-  
+
+  const clearAllPrompts = () => {
+    if (confirm('确定要清空所有提示词吗？此操作不可恢复！')) {
+      prompts.value = []
+      savePrompts()
+    }
+  }
+
+  const getPromptStats = () => {
+    return {
+      totalPrompts: prompts.value.length,
+      favoritePrompts: favoritePrompts.value.length,
+      publicPrompts: publicPrompts.value.length,
+      categoryStats: categoryStats.value
+    }
+  }
+
+  // 初始化
+  loadPrompts()
+  loadCategories()
+
   return {
+    // 状态
     prompts,
-    selectedPrompt,
-    searchKeyword,
-    selectedCategory,
-    filteredPrompts,
     categories,
+    isLoading,
+    filter,
+    
+    // 计算属性
+    filteredPrompts,
+    favoritePrompts,
+    publicPrompts,
+    allTags,
+    allAuthors,
+    categoryStats,
+    totalUsage,
+    
+    // 方法
+    loadPrompts,
+    savePrompts,
     createPrompt,
     updatePrompt,
     deletePrompt,
-    selectPrompt,
-    setSearchKeyword,
-    setSelectedCategory,
-    initSampleData
+    duplicatePrompt,
+    toggleFavorite,
+    incrementUsage,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    getCategoryById,
+    clearFilter,
+    exportPrompts,
+    importPrompts,
+    clearAllPrompts,
+    getPromptStats
   }
 })

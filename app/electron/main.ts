@@ -9,8 +9,8 @@ let mainWindow: BrowserWindow | null = null
 const createWindow = (): void => {
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    width: 1000,
+    height: 700,
     minWidth: 800,
     minHeight: 600,
     webPreferences: {
@@ -18,8 +18,19 @@ const createWindow = (): void => {
       contextIsolation: true,
       preload: join(__dirname, 'preload.js')
     },
-    titleBarStyle: 'hiddenInset',
+    titleBarStyle: 'default',
     show: false,
+    frame: true,
+    resizable: true,
+    movable: true,
+    minimizable: true,
+    maximizable: true,
+    closable: true,
+    focusable: true,
+    alwaysOnTop: false,
+    fullscreenable: true,
+    skipTaskbar: false,
+    kiosk: false,
     icon: join(__dirname, '../assets/icon.png')
   })
 
