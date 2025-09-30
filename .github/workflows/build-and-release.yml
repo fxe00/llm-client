@@ -107,8 +107,22 @@ jobs:
 
       - name: List artifacts for debugging
         run: |
+          echo "=== Artifacts directory structure ==="
           find ./artifacts -type f -name "*" | head -20
+          echo "=== Artifacts directory listing ==="
           ls -la ./artifacts/
+          echo "=== Checking each platform directory ==="
+          ls -la ./artifacts/macos-build/ || echo "macOS artifacts not found"
+          ls -la ./artifacts/linux-build/ || echo "Linux artifacts not found"
+          ls -la ./artifacts/windows-build/ || echo "Windows artifacts not found"
+
+      - name: Check if artifacts exist
+        run: |
+          if [ ! -d "./artifacts/macos-build" ] && [ ! -d "./artifacts/linux-build" ] && [ ! -d "./artifacts/windows-build" ]; then
+            echo "No artifacts found! Exiting..."
+            exit 1
+          fi
+          echo "Artifacts found, proceeding with release..."
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
