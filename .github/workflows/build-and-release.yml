@@ -37,16 +37,6 @@ jobs:
           cd app
           npm ci
 
-      - name: Build Vue application
-        run: |
-          cd app
-          npm run build
-
-      - name: Build Electron main process
-        run: |
-          cd app
-          npm run build:electron
-
       - name: Build Electron app (macOS)
         if: matrix.platform == 'mac'
         run: |
@@ -70,21 +60,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: macos-build
-          path: app/release/*.dmg
+          path: app/release/
 
       - name: Upload Linux artifacts
         if: matrix.platform == 'linux'
         uses: actions/upload-artifact@v4
         with:
           name: linux-build
-          path: app/release/*.AppImage
+          path: app/release/
 
       - name: Upload Windows artifacts
         if: matrix.platform == 'win'
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: app/release/*.exe
+          path: app/release/
 
   release:
     needs: build
@@ -101,9 +91,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./artifacts/macos-build/*.dmg
-            ./artifacts/linux-build/*.AppImage
-            ./artifacts/windows-build/*.exe
+            ./artifacts/macos-build/*
+            ./artifacts/linux-build/*
+            ./artifacts/windows-build/*
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
