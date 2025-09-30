@@ -73,7 +73,7 @@ jobs:
           set ELECTRON_BUILDER_CACHE=/tmp/electron-builder-cache
           npm run dist:win
           echo "Windows build completed"
-          ls -la release/
+          dir release\
 
       - name: Upload macOS artifacts
         if: matrix.platform == 'mac'
