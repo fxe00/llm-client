@@ -49,18 +49,24 @@ jobs:
         run: |
           cd app
           npm run dist:mac
+          echo "macOS build completed"
+          ls -la release/
 
       - name: Build Electron app (Linux)
         if: matrix.platform == 'linux'
         run: |
           cd app
           npm run dist:linux
+          echo "Linux build completed"
+          ls -la release/
 
       - name: Build Electron app (Windows)
         if: matrix.platform == 'win'
         run: |
           cd app
           npm run dist:win
+          echo "Windows build completed"
+          ls -la release/
 
       - name: Upload macOS artifacts
         if: matrix.platform == 'mac'
@@ -68,6 +74,7 @@ jobs:
         with:
           name: macos-build
           path: app/release/
+          retention-days: 1
 
       - name: Upload Linux artifacts
         if: matrix.platform == 'linux'
@@ -75,6 +82,7 @@ jobs:
         with:
           name: linux-build
           path: app/release/
+          retention-days: 1
 
       - name: Upload Windows artifacts
         if: matrix.platform == 'win'
@@ -82,6 +90,7 @@ jobs:
         with:
           name: windows-build
           path: app/release/
+          retention-days: 1
 
   release:
     needs: build
@@ -95,6 +104,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: ./artifacts
+
+      - name: List artifacts for debugging
+        run: |
+          find ./artifacts -type f -name "*" | head -20
+          ls -la ./artifacts/
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
