@@ -37,6 +37,11 @@ jobs:
           cd app
           npm ci
 
+      - name: Build application
+        run: |
+          cd app
+          npm run build
+
       - name: Build Electron app (macOS)
         if: matrix.platform == 'mac'
         run: |
