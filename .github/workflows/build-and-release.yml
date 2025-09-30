@@ -37,10 +37,15 @@ jobs:
           cd app
           npm ci
 
-      - name: Build application
+      - name: Build Vue application
         run: |
           cd app
           npm run build
+
+      - name: Build Electron main process
+        run: |
+          cd app
+          npm run build:electron
 
       - name: Build Electron app (macOS)
         if: matrix.platform == 'mac'
