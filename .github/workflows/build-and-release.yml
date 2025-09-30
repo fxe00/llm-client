@@ -34,6 +34,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: app/package-lock.json
 
+      - name: Set up environment variables (Windows)
+        if: matrix.platform == 'win'
+        run: |
+          echo "ELECTRON_BUILDER_CACHE=/tmp/electron-builder-cache" >> $GITHUB_ENV
+          echo "ELECTRON_CACHE=/tmp/electron-cache" >> $GITHUB_ENV
+
       - name: Install dependencies
         run: |
           cd app
@@ -64,6 +70,7 @@ jobs:
         if: matrix.platform == 'win'
         run: |
           cd app
+          set ELECTRON_BUILDER_CACHE=/tmp/electron-builder-cache
           npm run dist:win
           echo "Windows build completed"
           ls -la release/
